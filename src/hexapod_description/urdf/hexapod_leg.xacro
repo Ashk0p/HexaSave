@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <!-- Macro for physical leg links and joints -->
+  <xacro:macro name="hexapod_leg" params="prefix x y yaw">
+    
+    <!-- Coxa (Hip) -->
+    <link name="${prefix}_coxa">
+      <visual>
+        <geometry><cylinder radius="0.02" length="0.05"/></geometry>
+        <material name="gray"><color rgba="0.5 0.5 0.5 1"/></material>
+      </visual>
+      <collision><geometry><cylinder radius="0.02" length="0.05"/></geometry></collision>
+      <inertial><mass value="0.1"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+    </link>
+
+    <joint name="${prefix}_coxa_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_coxa"/>
+      <origin xyz="${x} ${y} 0" rpy="0 0 ${yaw}"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.57" upper="1.57" effort="10.0" velocity="2.0"/>
+    </joint>
+
+    <!-- Femur (Thigh) -->
+    <link name="${prefix}_femur">
+      <visual>
+        <origin xyz="0.05 0 0" rpy="0 1.5708 0"/>
+        <geometry><cylinder radius="0.015" length="0.1"/></geometry>
+        <material name="dark_gray"><color rgba="0.3 0.3 0.3 1"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0.05 0 0" rpy="0 1.5708 0"/>
+        <geometry><cylinder radius="0.015" length="0.1"/></geometry>
+      </collision>
+      <inertial><mass value="0.1"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+    </link>
+
+    <joint name="${prefix}_femur_joint" type="revolute">
+      <parent link="${prefix}_coxa"/>
+      <child link="${prefix}_femur"/>
+      <origin xyz="0.05 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.57" upper="1.57" effort="10.0" velocity="2.0"/>
+    </joint>
+
+    <!-- Tibia (Calf) -->
+    <link name="${prefix}_tibia">
+      <visual>
+        <origin xyz="0.075 0 0" rpy="0 1.5708 0"/>
+        <geometry><cylinder radius="0.01" length="0.15"/></geometry>
+        <material name="gray"><color rgba="0.5 0.5 0.5 1"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0.075 0 0" rpy="0 1.5708 0"/>
+        <geometry><cylinder radius="0.01" length="0.15"/></geometry>
+      </collision>
+      <inertial><mass value="0.1"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+    </link>
+
+    <joint name="${prefix}_tibia_joint" type="revolute">
+      <parent link="${prefix}_femur"/>
+      <child link="${prefix}_tibia"/>
+      <origin xyz="0.1 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-2.0" upper="2.0" effort="10.0" velocity="2.0"/>
+    </joint>
+
+  </xacro:macro>
+
+  <!-- Macro to map joint interfaces for ros2_control -->
+  <xacro:macro name="leg_control_interfaces" params="prefix">
+    <joint name="${prefix}_coxa_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="${prefix}_femur_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="${prefix}_tibia_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,83 @@
+ffsets)
+            print(f"Loaded existing calibration from {OUTPUT_FILE}")
+    except Exception as e:
+        print(f"Notice: Could not load cadef send_servo_cmd(ser, channel, pwm_val, move_time=100):
+    """Sends Torobot ASCII command for 1-based channel: #<ch>P<pwm>T<time>\r\n"""
+    cmd = f"#{channel}P{pwm_val}T{move_time}\r\n"
+    ser.write(cmd.encode('utf-8'))
+
+def center_all_servos(ser):
+    """Commands channels 1 through 18 to baseline 1500us + offsets."""
+    cmd_str = ""
+    for ch in range(START_CH, END_CH + 1):
+        pwm = 1500 + offsets[str(ch)]
+        cmd_str += f"#{ch}P{pwm}"
+    cmd_str += "T1000\r\n"
+    ser.write(cmd_str.encode('utf-8'))
+    print("Channels 1-18 set to neutral (1500us + saved offsets).")
+
+def save_calibration():
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    with open(OUTPUT_FILE, 'w') as f:
+        json.dump(offsets, f, indent=4)
+    print(f"Offsets successfully saved to {OUTPUT_FILE}")
+
+def main():
+    try:
+        ser = serial.Serial(PORT, BAUD, timeout=1)        time.sleep(1)
+        print(f"Connected to {PORT} at {BAUD} baud.")
+    except Exception as e:
+        print(f"Error opening port {PORT}: {e}")
+        return
+
+    center_all_servos(ser)
+   active_ch = 1
+    print("\n--- Interactive Servo Calibration (Channels 1-18) ---")
+    print("Controls:")
+    print("  1-18 : Select active channel")
+    print("  w/s  : Adjust active offset +10us / -10us")
+    print("  W/S  : Adjust active offset +50us / -50us")
+    print("  r    : Reset active offset to 0")
+    print("  c    : Recenter all servos")
+    print("  save : Save offset configuration to disk")
+    print("  q    : Quit calibration")
+    print("----------------------------------------------------\n")
+
+    while True:
+        current_pwm = 1500 + offsets[str(active_ch)]
+        cmd = input(f"[Channel {active_ch} | Offset: {offsets[str(active_ch)]:+d}us | PWM: {current_pwm}us] > ").strip()
+
+        if not cmd:
+            continue
+        elif cmd.isdigit() and START_CH <= int(cmd) <= END_CH:
+            active_ch = int(cmd)
+            print(f"Switched to Channel {active_ch}")
+        elif cmd == 'w':
+            offsets[str(active_ch)] += 10
+        elif cmd == 's':
+            offsets[str(active_ch)] -= 10
+        elif cmd == 'W':
+            offsets[str(active_ch)] += 50
+        elif cmd == 'S':
+            offsets[str(active_ch)] -= 50
+        elif cmd == 'r':
+            offsets[str(active_ch)] = 0
+        elif cmd == 'c':
+            center_all_servos(ser)
+            continue
+        elif cmd == 'save':
+            save_calibration()            continue
+        elif cmd == 'q':
+            print("Exiting calibration...")
+            break
+        else:
+            print("Invalid command. Enter a channel from 1 to 18.")
+            continue
+
+        new_pwm = 1500 + offsets[str(active_ch)]
+        send_servo_cmd(ser, active_ch, new_pwm, move_time=100)
+
+    ser.close()
+
+if __name__ == '__main__':
+    ma

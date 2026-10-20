@@ -1,0 +1,245 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hexapod">
+
+  <!-- ==================== PARAMETERS & DIMENSIONS ==================== -->
+  <xacro:property name="body_radius" value="0.15"/>
+  <xacro:property name="body_height" value="0.05"/>
+  <xacro:property name="body_mass" value="2.0"/>
+
+  <xacro:property name="coxa_len" value="0.05"/>
+  <xacro:property name="femur_len" value="0.10"/>
+  <xacro:property name="tibia_len" value="0.15"/>
+
+  <xacro:property name="coxa_mass" value="0.1"/>
+  <xacro:property name="femur_mass" value="0.15"/>
+  <xacro:property name="tibia_mass" value="0.1"/>
+
+  <!-- Standard Inertia Macros -->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertia ixx="${(m/12)*(3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+             iyy="${(m/12)*(3*r*r + h*h)}" iyz="0.0"
+             izz="${(m/2)*(r*r)}"/>
+  </xacro:macro>
+
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertia ixx="${(m/12)*(y*y + z*z)}" ixy="0.0" ixz="0.0"
+             iyy="${(m/12)*(x*x + z*z)}" iyz="0.0"
+             izz="${(m/12)*(x*x + y*y)}"/>
+  </xacro:macro>
+
+  <!-- ==================== BASE LINK ==================== -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${body_radius}" length="${body_height}"/>
+      </geometry>
+      <material name="dark_grey">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${body_radius}" length="${body_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${body_mass}"/>
+      <xacro:cylinder_inertia m="${body_mass}" r="${body_radius}" h="${body_height}"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== LEG MACRO ==================== -->
+  <xacro:macro name="hexapod_leg" params="prefix x_offset y_offset yaw_offset">
+    
+    <!-- COXA JOINT & LINK -->
+    <joint name="${prefix}_coxa_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_coxa_link"/>
+      <origin xyz="${x_offset} ${y_offset} 0" rpy="0 0 ${yaw_offset}"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.57" upper="1.57" effort="10.0" velocity="3.0"/>
+    </joint>
+
+    <link name="${prefix}_coxa_link">
+      <visual>
+        <origin xyz="${coxa_len/2} 0 0" rpy="0 1.5708 0"/>
+        <geometry>
+          <cylinder radius="0.015" length="${coxa_len}"/>
+        </geometry>
+        <material name="blue">
+          <color rgba="0.0 0.0 0.8 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="${coxa_len/2} 0 0" rpy="0 1.5708 0"/>
+        <geometry>
+          <cylinder radius="0.015" length="${coxa_len}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${coxa_len/2} 0 0" rpy="0 0 0"/>
+        <mass value="${coxa_mass}"/>
+        <xacro:cylinder_inertia m="${coxa_mass}" r="0.015" h="${coxa_len}"/>
+      </inertial>
+    </link>
+
+    <!-- FEMUR JOINT & LINK -->
+    <joint name="${prefix}_femur_joint" type="revolute">
+      <parent link="${prefix}_coxa_link"/>
+      <child link="${prefix}_femur_link"/>
+      <origin xyz="${coxa_len} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="-1.57" upper="1.57" effort="10.0" velocity="3.0"/>
+    </joint>
+
+    <link name="${prefix}_femur_link">
+      <visual>
+        <origin xyz="${femur_len/2} 0 0" rpy="0 1.5708 0"/>
+        <geometry>
+          <cylinder radius="0.012" length="${femur_len}"/>
+        </geometry>
+        <material name="red">
+          <color rgba="0.8 0.0 0.0 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="${femur_len/2} 0 0" rpy="0 1.5708 0"/>
+        <geometry>
+          <cylinder radius="0.012" length="${femur_len}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${femur_len/2} 0 0" rpy="0 0 0"/>
+        <mass value="${femur_mass}"/>
+        <xacro:cylinder_inertia m="${femur_mass}" r="0.012" h="${femur_len}"/>
+      </inertial>
+    </link>
+
+    <!-- TIBIA JOINT & LINK -->
+    <joint name="${prefix}_tibia_joint" type="revolute">
+      <parent link="${prefix}_femur_link"/>
+      <child link="${prefix}_tibia_link"/>
+      <origin xyz="${femur_len} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="-2.5" upper="0.5" effort="10.0" velocity="3.0"/>
+    </joint>
+
+    <link name="${prefix}_tibia_link">
+      <visual>
+        <origin xyz="${tibia_len/2} 0 0" rpy="0 1.5708 0"/>
+        <geometry>
+          <cylinder radius="0.01" length="${tibia_len}"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="${tibia_len/2} 0 0" rpy="0 1.5708 0"/>
+        <geometry>
+          <cylinder radius="0.01" length="${tibia_len}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${tibia_len/2} 0 0" rpy="0 0 0"/>
+        <mass value="${tibia_mass}"/>
+        <xacro:cylinder_inertia m="${tibia_mass}" r="0.01" h="${tibia_len}"/>
+      </inertial>
+    </link>
+
+  </xacro:macro>
+
+  <!-- ==================== INSTANTIATE 6 LEGS ==================== -->
+  <xacro:hexapod_leg prefix="leg1_front_right" x_offset="0.12"  y_offset="-0.10" yaw_offset="-0.7854"/>
+  <xacro:hexapod_leg prefix="leg2_mid_right"   x_offset="0.0"   y_offset="-0.15" yaw_offset="-1.5708"/>
+  <xacro:hexapod_leg prefix="leg3_back_right"  x_offset="-0.12" y_offset="-0.10" yaw_offset="-2.3562"/>
+  <xacro:hexapod_leg prefix="leg4_front_left"  x_offset="0.12"  y_offset="0.10"  yaw_offset="0.7854"/>
+  <xacro:hexapod_leg prefix="leg5_mid_left"    x_offset="0.0"   y_offset="0.15"  yaw_offset="1.5708"/>
+  <xacro:hexapod_leg prefix="leg6_back_left"   x_offset="-0.12" y_offset="0.10"  yaw_offset="2.3562"/>
+
+  <!-- ==================== CAMERA LINK & SENSOR ==================== -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${body_radius} 0 0.04" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.05 0.02"/>
+      </geometry>
+      <material name="green">
+        <color rgba="0.0 0.8 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.05 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <xacro:box_inertia m="0.05" x="0.02" y="0.05" z="0.02"/>
+    </inertial>
+  </link>
+
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="pi_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.0855</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+      </camera>
+      <topic>camera/image_raw</topic>
+      <gz_frame_id>camera_link</gz_frame_id>
+    </sensor>
+  </gazebo>
+
+  <!-- ==================== ROS2 CONTROL HARDWARE INTERFACE ==================== -->
+  <xacro:macro name="leg_control_interface" params="prefix">
+    <joint name="${prefix}_coxa_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="${prefix}_femur_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="${prefix}_tibia_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <xacro:leg_control_interface prefix="leg1_front_right"/>
+    <xacro:leg_control_interface prefix="leg2_mid_right"/>
+    <xacro:leg_control_interface prefix="leg3_back_right"/>
+    <xacro:leg_control_interface prefix="leg4_front_left"/>
+    <xacro:leg_control_interface prefix="leg5_mid_left"/>
+    <xacro:leg_control_interface prefix="leg6_back_left"/>
+  </ros2_control>
+
+  <!-- ==================== GAZEBO ROS2 CONTROL PLUGIN ==================== -->
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find hexapod_gazebo)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

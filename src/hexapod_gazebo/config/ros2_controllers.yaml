@@ -1,0 +1,31 @@
+controller_manager:
+  ros__parameters:
+    use_sim_time: true
+    update_rate: 50
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    hexapod_joint_controller:
+      type: forward_command_controller/ForwardCommandController
+
+hexapod_joint_controller:
+  ros__parameters:
+    interface_name: position
+    joints:
+      - leg1_front_right_coxa_joint
+      - leg1_front_right_femur_joint
+      - leg1_front_right_tibia_joint
+      - leg2_mid_right_coxa_joint
+      - leg2_mid_right_femur_joint
+      - leg2_mid_right_tibia_joint
+      - leg3_back_right_coxa_joint
+      - leg3_back_right_femur_joint
+      - leg3_back_right_tibia_joint
+      - leg4_front_left_coxa_joint
+      - leg4_front_left_femur_joint
+      - leg4_front_left_tibia_joint
+      - leg5_mid_left_coxa_joint
+      - leg5_mid_left_femur_joint
+      - leg5_mid_left_tibia_joint
+      - leg6_back_left_coxa_joint
+      - leg6_back_left_femur_joint
+      - leg6_back_left_tibia_joint
