@@ -1,10 +1,10 @@
-# 🤖 Hexapod Field Robotics Platform (ROS 2 Lyrical)
+#  Hexapod Field Robotics Platform (ROS 2 Lyrical)
 
 A fully autonomous, field-ready hexapod control architecture developed in Python for Ubuntu running **ROS 2 Lyrical Luth**. The platform features real-time target tracking via YOLO, a custom Inverse Kinematics (IK) gait controller tuned for high-friction hardware, micro-controller serial bridging over dual USB buses, and a responsive web-based HUD for remote field teleoperation.
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
 * **Headless Field HUD:** Flask-based Web Interface streaming live `mjpeg` camera feeds and publishing real-time joystick commands via `rosbridge_websocket` (Port `9090`).
 * **Multi-Mode Operational Pipeline:**
@@ -60,7 +60,7 @@ A fully autonomous, field-ready hexapod control architecture developed in Python
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### 1. System Dependencies
 Install ROS 2 dependencies and Python packages system-wide:
@@ -124,22 +124,6 @@ Optional launch arguments:
 
 ---
 
-### 🦀 Standalone Crab Rave Mode
-To trigger the sway dance without booting the full perception stack:
-
-```bash
-# Terminal 1: Launch the Hardware Servo Bridge
-source /opt/ros/lyrical/setup.bash
-source ~/hexapod_ws/install/setup.bash
-ros2 run hexapod_controller servo_bridge
-
-# Terminal 2: Run the Kinematic Sway Routine
-source /opt/ros/lyrical/setup.bash
-source ~/hexapod_ws/install/setup.bash
-python3 ~/hexapod_ws/crab_rave.py
-```
-
----
 
 ## 📡 Topic Reference
 
