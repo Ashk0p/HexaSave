@@ -18,7 +18,7 @@ A fully autonomous, field-ready hexapod control architecture developed in Python
 
 ---
 
-## 🏗 System Architecture
+##  System Architecture
 
 ```
                                 +-------------------+
